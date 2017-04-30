@@ -1,24 +1,33 @@
-# This code is an example for a tutorial on Ubuntu Unity/Gnome AppIndicators:
+# This code is an example for a tutorial ON Ubuntu Unity/Gnome AppIndicators:
 # http://candidtim.github.io/appindicator/2014/09/13/ubuntu-appindicator-step-by-step.html
 
-import os, signal, gi
+import os, signal, gi, time
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('Notify', '0.7')
 gi.require_version('AppIndicator3', '0.1')
 
-import json
-
 from urllib2 import Request, urlopen, URLError
-
 from gi.repository import Gtk as gtk
 from gi.repository import AppIndicator3 as appindicator
 from gi.repository import Notify as notify
-
+from gi.repository import GObject
 
 APPINDICATOR_ID = 'McController'
 
+IP = "grapefruit.vingu.online"
+
+SURVIVAL_PORT = "25555"
+PANGEA_PORT = "25001"
+TEST_PORT = "25123"
+
+indicator = None
+server_status = None
+
 def main():
+	global indicator
+	global server_status
+	server_status = get_status()
 	indicator = appindicator.Indicator.new(APPINDICATOR_ID, 
 		os.path.abspath('../icon/minecraft.png'), 
 		appindicator.IndicatorCategory.SYSTEM_SERVICES)
@@ -27,12 +36,23 @@ def main():
 	indicator.set_menu(build_menu())
 	notify.init(APPINDICATOR_ID)
 	notify.Notification.new("<b>Notification</b>", 'mc-controller gestartet.', None).show()
-	
-
+	GObject.timeout_add_seconds(1, update_widget)
 	gtk.main()
+
+def update_widget():
+	global indicator
+	global server_status
+	if not server_status == get_status():
+		server_status = get_status()
+		indicator.set_menu(build_menu())
+
+	# Update current status.
+	return True
 
 
 def build_menu():
+	global server_status
+	global TEST
 	menu = gtk.Menu()
 
 	##########################################################
@@ -51,7 +71,7 @@ def build_menu():
 	submenu_survival.append(item_stop_survival)
 	submenu_survival.append(show_logs_survival)
 
-	item_survival = gtk.MenuItem('Survival-Server')
+	item_survival = gtk.MenuItem(server_status["survival"] + " Survival-Server")
 	item_survival.set_submenu(submenu_survival)
 	menu.append(item_survival)
 
@@ -71,7 +91,7 @@ def build_menu():
 	submenu_pangea.append(item_stop_pangea)
 	submenu_pangea.append(show_logs_pangea)
 
-	item_pangea = gtk.MenuItem('Pangea-Server')
+	item_pangea = gtk.MenuItem(server_status["pangea"] + ' Pangea-Server')
 	item_pangea.set_submenu(submenu_pangea)
 	menu.append(item_pangea)
 
@@ -91,7 +111,7 @@ def build_menu():
 	submenu_test.append(item_start_test)
 	submenu_test.append(item_stop_test)
 	submenu_test.append(show_logs_test)
-	item_test = gtk.MenuItem('Test-Server')
+	item_test = gtk.MenuItem(server_status["test"] + ' Test-Server')
 	item_test.set_submenu(submenu_test)
 	menu.append(item_test)
 
@@ -136,7 +156,7 @@ def stop_server(_, server):
 	os.system("gnome-terminal -e '" + linux_cmd + "'")
 
 def show_logs(_, server):
-	notify.Notification.new("<b>Notification</b>", 'Zeige server logs von '+ server + '', None).show()
+	notify.Notification.new("<b>Notification</b>", 'Zeige server logs vON '+ server + '', None).show()
 	linux_cmd = 'ssh robin@grapefruit.vingu.online make show_logs_' + server
 	os.system("gnome-terminal -e '" + linux_cmd + "'")
 
@@ -145,15 +165,40 @@ def update(_):
 	default_path = os.getcwd()
 	process_id = os.getpid()
 	os.chdir(default_path + "/../")
-	os.system("gnome-terminal -e " + 'pwd && git pull origin master && cd src/ && python mc-controller.py &')
-	os.system("kill " + str(process_id))
+	os.system("gnome-terminal -e " + 'git pull origin master && cd src/ && pythON mc-controller.py &')
 	os.chdir(default_path)
+	os.system("kill " + str(process_id))
 
 
 def quit(_):
 	notify.Notification.new("<b>Notification</b>", 'mc-controller wird beendet.', None).show()
 	notify.uninit()
 	gtk.main_quit()
+
+
+def get_status():
+	global IP
+	global SURVIVAL_PORT
+	global PANGEA_PORT
+	global TEST_PORT
+
+	output = {}
+	if not os.system("nc " + IP + " " + PANGEA_PORT + " < /dev/null"):
+		output["pangea"] = "[ON ]\t"
+	else:
+		output["pangea"] = "[OFF]\t"
+
+	if not os.system("nc " + IP + " " + SURVIVAL_PORT + " < /dev/null"):
+		output["survival"] = "[ON ]\t"
+	else:
+		output["survival"] = "[OFF]\t"
+
+	if not os.system("nc " + IP + " " + TEST_PORT + " < /dev/null"):
+		output["test"] = "[ON ]\t"
+	else:
+		output["test"] = "[OFF]\t"
+
+	return output
 
 if __name__ == "__main__":
 	signal.signal(signal.SIGINT, signal.SIG_DFL)
