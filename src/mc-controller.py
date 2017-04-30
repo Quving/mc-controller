@@ -26,7 +26,11 @@ def main():
 	indicator.set_status(appindicator.IndicatorStatus.ACTIVE)
 	indicator.set_menu(build_menu())
 	notify.init(APPINDICATOR_ID)
+	notify.Notification.new("<b>Notification</b>", 'mc-controller gestartet.', None).show()
+	
+
 	gtk.main()
+
 
 def build_menu():
 	menu = gtk.Menu()
@@ -34,10 +38,10 @@ def build_menu():
 	##########################################################
 	# Survival
 	submenu_survival = gtk.Menu()
-	item_start_survival = gtk.MenuItem('Start!')
+	item_start_survival = gtk.MenuItem('Start server')
 	item_start_survival.connect('activate', start_survival)
 
-	item_stop_survival = gtk.MenuItem('Stop!')
+	item_stop_survival = gtk.MenuItem('Stop server')
 	item_stop_survival.connect('activate', stop_survival)
 
 
@@ -50,10 +54,10 @@ def build_menu():
 	##########################################################
 	# PANGEA
 	submenu_pangea = gtk.Menu()
-	item_start_pangea = gtk.MenuItem('Start!')
+	item_start_pangea = gtk.MenuItem('Start server')
 	item_start_pangea.connect('activate', start_pangea)
 
-	item_stop_pangea = gtk.MenuItem('Stop!')
+	item_stop_pangea = gtk.MenuItem('Stop server')
 	item_stop_pangea.connect('activate', stop_pangea)
 
 	submenu_pangea.append(item_start_pangea)
@@ -66,10 +70,10 @@ def build_menu():
 	# Test
 
 	submenu_test = gtk.Menu()
-	item_start_test = gtk.MenuItem('Start!')
+	item_start_test = gtk.MenuItem('Start server')
 	item_start_test.connect('activate', start_test)
 
-	item_stop_test = gtk.MenuItem('Stop!')
+	item_stop_test = gtk.MenuItem('Stop server')
 	item_stop_test.connect('activate', stop_test)
 
 	submenu_test.append(item_start_test)
@@ -83,9 +87,9 @@ def build_menu():
 	item_joke = gtk.MenuItem('Joke')
 	item_joke.connect('activate', joke)
 	menu.append(item_joke)
-
+	menu.append(gtk.SeparatorMenuItem())
 	# Update
-	item_update = gtk.MenuItem('Update')
+	item_update = gtk.MenuItem('Update mc-controller')
 	item_update.connect('activate', update)
 	menu.append(item_update)
 
@@ -108,31 +112,31 @@ def joke(_):
 	notify.Notification.new("<b>Joke</b>", fetch_joke(), None).show()
 	
 def start_survival(_):
-	notify.Notification.new("<b>Notication</b>", 'Server Survival wird gestartet.', None).show()
+	notify.Notification.new("<b>Notification</b>", 'Server Survival wird gestartet.', None).show()
 	os.system("gnome-terminal -e 'ssh robin@grapefruit.vingu.online make start_survival'")
 
 def stop_survival(_):
-	notify.Notification.new("<b>Notication</b>", 'Server Survival wird gestoppt.', None).show()
+	notify.Notification.new("<b>Notification</b>", 'Server Survival wird gestoppt.', None).show()
 	os.system("gnome-terminal -e 'ssh robin@grapefruit.vingu.online make stop_survival'")
 
 def start_pangea(_):
-	notify.Notification.new("<b>Notication</b>", 'Server Pangea wird gestartet.', None).show()
+	notify.Notification.new("<b>Notification</b>", 'Server Pangea wird gestartet.', None).show()
 	os.system("gnome-terminal -e 'ssh robin@grapefruit.vingu.online make start_pangea'")
 
 def stop_pangea(_):
-	notify.Notification.new("<b>Notication</b>", 'Server Pangea wird gestoppt.', None).show()
+	notify.Notification.new("<b>Notification</b>", 'Server Pangea wird gestoppt.', None).show()
 	os.system("gnome-terminal -e 'ssh robin@grapefruit.vingu.online make stop_pangea'")
 
 def start_test(_):
-	notify.Notification.new("<b>Notication</b>", 'Server Test wird gestartet.', None).show()
+	notify.Notification.new("<b>Notification</b>", 'Server Test wird gestartet.', None).show()
 	os.system("gnome-terminal -e 'ssh robin@grapefruit.vingu.online make start_test'")
 
 def stop_test(_):
-	notify.Notification.new("<b>Notication</b>", 'Server Test wird gestoppt.', None).show()
+	notify.Notification.new("<b>Notification</b>", 'Server Test wird gestoppt.', None).show()
 	os.system("gnome-terminal -e 'ssh robin@grapefruit.vingu.online make stop_test'")
 
 def update(_):
-	notify.Notification.new("<b>Notication</b>", 'Aktualisiere...', None).show()
+	notify.Notification.new("<b>Notification</b>", 'Aktualisiere...', None).show()
 	default_path = os.getcwd()
 	process_id = os.getpid()
 	os.chdir(default_path + "/../")
@@ -143,6 +147,7 @@ def update(_):
 
 
 def quit(_):
+	notify.Notification.new("<b>Notification</b>", 'mc-controller wird beendet.', None).show()
 	notify.uninit()
 	gtk.main_quit()
 
