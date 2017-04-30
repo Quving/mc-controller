@@ -39,14 +39,18 @@ def build_menu():
 	# Survival
 	submenu_survival = gtk.Menu()
 	item_start_survival = gtk.MenuItem('Start server')
-	item_start_survival.connect('activate', start_survival)
+	item_start_survival.connect('activate', start_server, "survival")
 
 	item_stop_survival = gtk.MenuItem('Stop server')
-	item_stop_survival.connect('activate', stop_survival)
+	item_stop_survival.connect('activate', stop_server, "survival")
 
+	show_logs_survival = gtk.MenuItem('Show logs')
+	show_logs_survival.connect('activate', show_logs, "survival")
 
 	submenu_survival.append(item_start_survival)
 	submenu_survival.append(item_stop_survival)
+	submenu_survival.append(show_logs_survival)
+
 	item_survival = gtk.MenuItem('Survival-Server')
 	item_survival.set_submenu(submenu_survival)
 	menu.append(item_survival)
@@ -55,13 +59,18 @@ def build_menu():
 	# PANGEA
 	submenu_pangea = gtk.Menu()
 	item_start_pangea = gtk.MenuItem('Start server')
-	item_start_pangea.connect('activate', start_pangea)
+	item_start_pangea.connect('activate', start_server, "pangea")
 
 	item_stop_pangea = gtk.MenuItem('Stop server')
-	item_stop_pangea.connect('activate', stop_pangea)
+	item_stop_pangea.connect('activate', stop_server, "pangea")
+
+	show_logs_pangea = gtk.MenuItem('Show logs')
+	show_logs_pangea.connect('activate', show_logs, "pangea")
 
 	submenu_pangea.append(item_start_pangea)
 	submenu_pangea.append(item_stop_pangea)
+	submenu_pangea.append(show_logs_pangea)
+
 	item_pangea = gtk.MenuItem('Pangea-Server')
 	item_pangea.set_submenu(submenu_pangea)
 	menu.append(item_pangea)
@@ -71,23 +80,27 @@ def build_menu():
 
 	submenu_test = gtk.Menu()
 	item_start_test = gtk.MenuItem('Start server')
-	item_start_test.connect('activate', start_test)
+	item_start_test.connect('activate', start_server, "test")
 
 	item_stop_test = gtk.MenuItem('Stop server')
-	item_stop_test.connect('activate', stop_test)
+	item_stop_test.connect('activate', stop_server, "test")
+
+	show_logs_test = gtk.MenuItem('Show logs')
+	show_logs_test.connect('activate', show_logs, "test")
 
 	submenu_test.append(item_start_test)
 	submenu_test.append(item_stop_test)
+	submenu_test.append(show_logs_test)
 	item_test = gtk.MenuItem('Test-Server')
 	item_test.set_submenu(submenu_test)
 	menu.append(item_test)
-
 
 	# Joke
 	item_joke = gtk.MenuItem('Joke')
 	item_joke.connect('activate', joke)
 	menu.append(item_joke)
 	menu.append(gtk.SeparatorMenuItem())
+
 	# Update
 	item_update = gtk.MenuItem('Update mc-controller')
 	item_update.connect('activate', update)
@@ -110,30 +123,22 @@ def fetch_joke():
 
 def joke(_):
 	notify.Notification.new("<b>Joke</b>", fetch_joke(), None).show()
+
 	
-def start_survival(_):
-	notify.Notification.new("<b>Notification</b>", 'Server Survival wird gestartet.', None).show()
-	os.system("gnome-terminal -e 'ssh robin@grapefruit.vingu.online make start_survival'")
+def start_server(_, server):
+	notify.Notification.new("<b>Notification</b>", 'Server '+ server+ ' wird gestartet.', None).show()
+	linux_cmd = 'ssh robin@grapefruit.vingu.online make start_' + server
+	os.system("gnome-terminal -e '" + linux_cmd + "'")
 
-def stop_survival(_):
-	notify.Notification.new("<b>Notification</b>", 'Server Survival wird gestoppt.', None).show()
-	os.system("gnome-terminal -e 'ssh robin@grapefruit.vingu.online make stop_survival'")
+def stop_server(_, server):
+	notify.Notification.new("<b>Notification</b>", 'Server '+ server + ' wird gestoppt.', None).show()
+	linux_cmd = 'ssh robin@grapefruit.vingu.online make stop_' + server
+	os.system("gnome-terminal -e '" + linux_cmd + "'")
 
-def start_pangea(_):
-	notify.Notification.new("<b>Notification</b>", 'Server Pangea wird gestartet.', None).show()
-	os.system("gnome-terminal -e 'ssh robin@grapefruit.vingu.online make start_pangea'")
-
-def stop_pangea(_):
-	notify.Notification.new("<b>Notification</b>", 'Server Pangea wird gestoppt.', None).show()
-	os.system("gnome-terminal -e 'ssh robin@grapefruit.vingu.online make stop_pangea'")
-
-def start_test(_):
-	notify.Notification.new("<b>Notification</b>", 'Server Test wird gestartet.', None).show()
-	os.system("gnome-terminal -e 'ssh robin@grapefruit.vingu.online make start_test'")
-
-def stop_test(_):
-	notify.Notification.new("<b>Notification</b>", 'Server Test wird gestoppt.', None).show()
-	os.system("gnome-terminal -e 'ssh robin@grapefruit.vingu.online make stop_test'")
+def show_logs(_, server):
+	notify.Notification.new("<b>Notification</b>", 'Zeige server logs von '+ server + '', None).show()
+	linux_cmd = 'ssh robin@grapefruit.vingu.online make show_logs_' + server
+	os.system("gnome-terminal -e '" + linux_cmd + "'")
 
 def update(_):
 	notify.Notification.new("<b>Notification</b>", 'Aktualisiere...', None).show()
@@ -143,7 +148,6 @@ def update(_):
 	os.system("gnome-terminal -e " + 'pwd && git pull origin master && cd src/ && python mc-controller.py &')
 	os.system("kill " + str(process_id))
 	os.chdir(default_path)
-
 
 
 def quit(_):
