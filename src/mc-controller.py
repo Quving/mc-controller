@@ -1,7 +1,6 @@
-# This code is an example for a tutorial ON Ubuntu Unity/Gnome AppIndicators:
-# http://candidtim.github.io/appindicator/2014/09/13/ubuntu-appindicator-step-by-step.html
-
-import os, signal, gi, time
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+import os, signal, gi, time, json
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('Notify', '0.7')
@@ -25,6 +24,7 @@ indicator = None
 server_status = None
 
 def main():
+	GObject.timeout_add_seconds(1, update_widget)
 	global indicator
 	global server_status
 	server_status = get_status()
@@ -36,7 +36,6 @@ def main():
 	indicator.set_menu(build_menu())
 	notify.init(APPINDICATOR_ID)
 	notify.Notification.new("<b>Notification</b>", 'mc-controller gestartet.', None).show()
-	GObject.timeout_add_seconds(1, update_widget)
 	gtk.main()
 
 def update_widget():
@@ -45,6 +44,8 @@ def update_widget():
 	if not server_status == get_status():
 		server_status = get_status()
 		indicator.set_menu(build_menu())
+		notify.Notification.new("<b>Notification</b>", 'Server status changed.', None).show()
+
 
 	# Update current status.
 	return True
@@ -71,7 +72,7 @@ def build_menu():
 	submenu_survival.append(item_stop_survival)
 	submenu_survival.append(show_logs_survival)
 
-	item_survival = gtk.MenuItem(server_status["survival"] + " Survival-Server")
+	item_survival = gtk.MenuItem(server_status["survival"] + "Survival-Server" )
 	item_survival.set_submenu(submenu_survival)
 	menu.append(item_survival)
 
@@ -91,7 +92,7 @@ def build_menu():
 	submenu_pangea.append(item_stop_pangea)
 	submenu_pangea.append(show_logs_pangea)
 
-	item_pangea = gtk.MenuItem(server_status["pangea"] + ' Pangea-Server')
+	item_pangea = gtk.MenuItem(server_status["pangea"] + 'Pangea-Server')
 	item_pangea.set_submenu(submenu_pangea)
 	menu.append(item_pangea)
 
@@ -111,23 +112,23 @@ def build_menu():
 	submenu_test.append(item_start_test)
 	submenu_test.append(item_stop_test)
 	submenu_test.append(show_logs_test)
-	item_test = gtk.MenuItem(server_status["test"] + ' Test-Server')
+	item_test = gtk.MenuItem(server_status["test"] + 'Test-Server')
 	item_test.set_submenu(submenu_test)
 	menu.append(item_test)
 
 	# Joke
-	item_joke = gtk.MenuItem('Joke')
+	item_joke = gtk.MenuItem('Random joke :D')
 	item_joke.connect('activate', joke)
 	menu.append(item_joke)
 	menu.append(gtk.SeparatorMenuItem())
 
 	# Update
-	item_update = gtk.MenuItem('Update mc-controller')
+	item_update = gtk.MenuItem('Update mc-controller!  (^.^)')
 	item_update.connect('activate', update)
 	menu.append(item_update)
 
 	# Quit
-	item_quit = gtk.MenuItem('Quit')
+	item_quit = gtk.MenuItem('Quit!  :<')
 	item_quit.connect('activate', quit)
 	menu.append(item_quit)
 
@@ -140,11 +141,9 @@ def fetch_joke():
 	joke = json.loads(response.read())['value']['joke']
 	return joke
 
-
 def joke(_):
 	notify.Notification.new("<b>Joke</b>", fetch_joke(), None).show()
 
-	
 def start_server(_, server):
 	notify.Notification.new("<b>Notification</b>", 'Server '+ server+ ' wird gestartet.', None).show()
 	linux_cmd = 'ssh robin@grapefruit.vingu.online make start_' + server
@@ -165,7 +164,7 @@ def update(_):
 	default_path = os.getcwd()
 	process_id = os.getpid()
 	os.chdir(default_path + "/../")
-	os.system("gnome-terminal -e " + 'git pull origin master && cd src/ && pythON mc-controller.py &')
+	os.system("gnome-terminal -e " + 'git pull origin master && cd src/ && python mc-controller.py &')
 	os.chdir(default_path)
 	os.system("kill " + str(process_id))
 
@@ -183,20 +182,22 @@ def get_status():
 	global TEST_PORT
 
 	output = {}
+	on_string = "» [on ]\t"
+	off_string = "» [off]\t"
 	if not os.system("nc " + IP + " " + PANGEA_PORT + " < /dev/null"):
-		output["pangea"] = "[ON ]\t"
+		output["pangea"] = on_string
 	else:
-		output["pangea"] = "[OFF]\t"
+		output["pangea"] = off_string
 
 	if not os.system("nc " + IP + " " + SURVIVAL_PORT + " < /dev/null"):
-		output["survival"] = "[ON ]\t"
+		output["survival"] = on_string
 	else:
-		output["survival"] = "[OFF]\t"
+		output["survival"] = off_string
 
 	if not os.system("nc " + IP + " " + TEST_PORT + " < /dev/null"):
-		output["test"] = "[ON ]\t"
+		output["test"] = on_string
 	else:
-		output["test"] = "[OFF]\t"
+		output["test"] = off_string
 
 	return output
 
