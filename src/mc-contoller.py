@@ -14,7 +14,10 @@ from gi.repository import Notify as notify
 APPINDICATOR_ID = 'McController'
 
 def main():
-	indicator = appindicator.Indicator.new(APPINDICATOR_ID, os.path.abspath('../icon/minecraft.png'), appindicator.IndicatorCategory.SYSTEM_SERVICES)
+	indicator = appindicator.Indicator.new(APPINDICATOR_ID, 
+		os.path.abspath('../icon/minecraft.png'), 
+		appindicator.IndicatorCategory.SYSTEM_SERVICES)
+
 	indicator.set_status(appindicator.IndicatorStatus.ACTIVE)
 	indicator.set_menu(build_menu())
 	notify.init(APPINDICATOR_ID)
@@ -22,12 +25,23 @@ def main():
 
 def build_menu():
 	menu = gtk.Menu()
+	submenu = gtk.Menu()
+	submenu.append(gtk.MenuItem('Bat'))
+	item_submenu = gtk.MenuItem('item_submenu')
+	item_submenu.set_submenu(submenu)
+	menu.append(item_submenu)
+
+
+	# Joke
 	item_joke = gtk.MenuItem('Joke')
 	item_joke.connect('activate', joke)
 	menu.append(item_joke)
+
+	# Quit
 	item_quit = gtk.MenuItem('Quit')
 	item_quit.connect('activate', quit)
 	menu.append(item_quit)
+
 	menu.show_all()
 	return menu
 
