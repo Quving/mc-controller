@@ -284,7 +284,7 @@ def get_status():
         output["test"] = on_string
     else:
         output["test"] = off_string
-    print json.dumps(output, indent = 2)
+    # print json.dumps(output, indent = 2)
 
     return output
 
