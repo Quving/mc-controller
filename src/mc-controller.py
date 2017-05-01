@@ -81,7 +81,7 @@ def build_menu():
 
 	##########################################################
 	# PANGEA
-	
+
 	submenu_pangea = gtk.Menu()
 	item_start_pangea = gtk.MenuItem('Start server')
 	item_start_pangea.connect('activate', start_server, "pangea")
@@ -183,6 +183,8 @@ def update(_):
 	os.system("kill " + str(process_id))
 
 def create_backup(_, server):
+	default_path = os.getcwd()
+	os.chdir("/home")
 	dialog = gtk.FileChooserDialog("Select folder to create a backup of "+ server + "-server!", 
 		None, gtk.FileChooserAction.SAVE,
 		(gtk.STOCK_CANCEL, gtk.ResponseType.CANCEL,
@@ -210,7 +212,7 @@ def create_backup(_, server):
 	response = dialog.run()
 
 	if response == gtk.ResponseType.OK:
-		print dialog.get_filename(), 'selected'
+		os.chdir(default_path)
 		notify.Notification.new("<b>Notification</b>", 'Backup wird erstellt für ' + server + '', None).show()
 		linux_cmd = ""
 		if server == "survival":
@@ -221,10 +223,18 @@ def create_backup(_, server):
 
 		if server == "test":
 			linux_cmd = 'rsync -r -v --progress robin@grapefruit.vingu.online:/srv/minecraft-test ' + str(dialog.get_filename())
+		
+		# Execute command to backup
+		state = os.system("gnome-terminal -e '" + linux_cmd + "'")
+		if state == 0:
+			notify.Notification.new("<b>Notification</b>", 'Backup für ' + server + ' wurde erfolgreich erstellt.', None).show()
+		else:
+			notify.Notification.new("<b>Notification</b>", 'Backup für ' + server + ' konnte nicht erstellt werden.', None).show()
 
-		os.system("gnome-terminal -e '" + linux_cmd + "'")
 	elif response == gtk.ResponseType.CANCEL:
-		print 'Closed, no files selected'
+		os.chdir(default_path)
+		notify.Notification.new("<b>Notification</b>", 'Backup für ' + server + ' wurde nicht erstellt.', None).show()
+
 
 	dialog.destroy()
 
