@@ -194,7 +194,6 @@ def update(_):
     os.chdir(default_path + "/../")
     os.system(TERMINAL + " -e 'git pull origin master'")
     os.chdir(default_path)
-    os.system('python mc-controller.py & ')
     os.system('kill ' + str(process_id))
 
 
