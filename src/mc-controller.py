@@ -21,6 +21,7 @@ TEST_PORT = "25123"
 PANGEA_PORT = "25001"
 SURVIVAL_PORT = "25555"
 
+TERMINAL = "konsole"
 indicator = None
 server_status = None
 
@@ -161,24 +162,24 @@ def joke(_):
 def start_server(_, server):
 	notify.Notification.new("<b>Notification</b>", 'Server '+ server+ ' wird gestartet.', None).show()
 	linux_cmd = 'ssh robin@grapefruit.vingu.online make start_' + server
-	os.system("gnome-terminal -e '" + linux_cmd + "'")
+	os.system(TERMINAL + " -e '" + linux_cmd + "'")
 
 def stop_server(_, server):
 	notify.Notification.new("<b>Notification</b>", 'Server '+ server + ' wird gestoppt.', None).show()
 	linux_cmd = 'ssh robin@grapefruit.vingu.online make stop_' + server
-	os.system("gnome-terminal -e '" + linux_cmd + "'")
+	os.system(TERMINAL + " -e '" + linux_cmd + "'")
 
 def show_logs(_, server):
 	notify.Notification.new("<b>Notification</b>", 'Zeige server logs von ' + server + '', None).show()
 	linux_cmd = 'ssh robin@grapefruit.vingu.online make show_logs_' + server
-	os.system("gnome-terminal -e '" + linux_cmd + "'")
+	os.system(TERMINAL + " -e '" + linux_cmd + "'")
 
 def update(_):
 	notify.Notification.new("<b>Notification</b>", 'Aktualisiere...', None).show()
 	default_path = os.getcwd()
 	process_id = os.getpid()
 	os.chdir(default_path + "/../")
-	os.system("gnome-terminal -e " + 'git pull origin master && sleep 5 && cd src/ && python mc-controller.py & kill ' + str(process_id))
+	os.system(TERMINAL + "-e " + 'git pull origin master && sleep 5 && cd src/ && python mc-controller.py & kill ' + str(process_id))
 
 def create_backup(_, server):
 	default_path = os.getcwd()
@@ -223,7 +224,7 @@ def create_backup(_, server):
 			linux_cmd = 'rsync -r -v --progress robin@grapefruit.vingu.online:/srv/minecraft-test ' + str(dialog.get_filename())
 		
 		# Execute command to backup
-		state = os.system("gnome-terminal -e '" + linux_cmd + "'")
+		state = os.system(TERMINAL + " -e '" + linux_cmd + "'")
 		if state == 0:
 			notify.Notification.new("<b>Notification</b>", 'Backup für ' + server + ' wurde erfolgreich erstellt.', None).show()
 		else:
