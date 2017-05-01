@@ -30,7 +30,7 @@ server_status = None
 
 
 def main():
-    GObject.timeout_add_seconds(1, update_widget)
+    GObject.timeout_add_seconds(3, update_widget)
     global indicator
     global server_status
     server_status = get_status()
@@ -283,6 +283,7 @@ def get_status():
         output["test"] = on_string
     else:
         output["test"] = off_string
+    print json.dumps(output, indent = 2)
 
     return output
 
