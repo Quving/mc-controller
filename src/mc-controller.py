@@ -24,7 +24,6 @@ IP = "grapefruit.vingu.online"
 TEST_PORT = "25123"
 PANGEA_PORT = "25001"
 SURVIVAL_PORT = "25555"
-
 # TERMINAL = "gnome-terminal"
 TERMINAL = "konsole"
 indicator = None
@@ -233,13 +232,13 @@ def create_backup(_, server):
         notify.Notification.new("<b>Notification</b>", 'Backup wird erstellt für ' + server + '', None).show()
         linux_cmd = ""
         if server == "survival":
-            linux_cmd = 'rsync -r -v --progress robin@grapefruit.vingu.online:/srv/minecraft-surv ' + str(dialog.get_filename())
+            linux_cmd = 'rsync -r -v --progress robin@grapefruit.vingu.online:/srv/minecraft-surv/ ' + str(dialog.get_filename())
 
         if server == "pangea":
-            linux_cmd = 'rsync -r -v --progress robin@grapefruit.vingu.online:/srv/minecraft-prod ' + str(dialog.get_filename())
+            linux_cmd = 'rsync -r -v --progress robin@grapefruit.vingu.online:/srv/minecraft-prod/ ' + str(dialog.get_filename())
 
         if server == "test":
-            linux_cmd = 'rsync -r -v --progress robin@grapefruit.vingu.online:/srv/minecraft-test ' + str(dialog.get_filename())
+            linux_cmd = 'rsync -r -v --progress robin@grapefruit.vingu.online:/srv/minecraft-test/ ' + str(dialog.get_filename())
 
         # Execute command to backup
         state = os.system(TERMINAL + " -e '" + linux_cmd + "'")
