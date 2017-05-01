@@ -178,7 +178,7 @@ def update(_):
 	default_path = os.getcwd()
 	process_id = os.getpid()
 	os.chdir(default_path + "/../")
-	os.system("gnome-terminal -e " + 'git pull origin master && cd src/ && python mc-controller.py & kill ' + str(process_id))
+	os.system("gnome-terminal -e " + 'git pull origin master && sleep 5 && cd src/ && python mc-controller.py & kill ' + str(process_id))
 
 def create_backup(_, server):
 	default_path = os.getcwd()
