@@ -174,11 +174,14 @@ def show_logs(_, server):
 	os.system("gnome-terminal -e '" + linux_cmd + "'")
 
 def update(_):
-	notify.Notification.new("<b>Notification</b>", 'Aktualisiere...', None).show()
+ 	notify.Notification.new("<b>Notification</b>", 'Aktualisiere...', None).show()
 	default_path = os.getcwd()
 	process_id = os.getpid()
 	os.chdir(default_path + "/../")
-	os.system("gnome-terminal -e " + 'git pull origin master && sleep 5 && cd src/ && python mc-controller.py & kill ' + str(process_id))
+	os.system("gnome-terminal -e 'git pull origin master'")
+	os.chdir(default_path)
+	os.system('python mc-controller.py & ')
+	os.system('kill ' + str(process_id))
 
 def create_backup(_, server):
 	default_path = os.getcwd()
@@ -221,8 +224,8 @@ def create_backup(_, server):
 
 		if server == "test":
 			linux_cmd = 'rsync -r -v --progress robin@grapefruit.vingu.online:/srv/minecraft-test ' + str(dialog.get_filename())
-		
-		# Execute command to backup
+
+        # Execute command to backup
 		state = os.system("gnome-terminal -e '" + linux_cmd + "'")
 		if state == 0:
 			notify.Notification.new("<b>Notification</b>", 'Backup für ' + server + ' wurde erfolgreich erstellt.', None).show()
