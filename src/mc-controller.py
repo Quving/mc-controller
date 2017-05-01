@@ -6,15 +6,16 @@ import signal
 import gi
 import json
 
+gi.require_version('Gtk', '3.0')
+gi.require_version('Notify', '0.7')
+gi.require_version('AppIndicator3', '0.1')
+
 from urllib2 import Request, urlopen
 from gi.repository import Gtk as gtk
 from gi.repository import AppIndicator3 as appindicator
 from gi.repository import Notify as notify
 from gi.repository import GObject
 
-gi.require_version('Gtk', '3.0')
-gi.require_version('Notify', '0.7')
-gi.require_version('AppIndicator3', '0.1')
 
 
 APPINDICATOR_ID = 'McController'
@@ -25,6 +26,7 @@ TEST_PORT = "25123"
 PANGEA_PORT = "25001"
 SURVIVAL_PORT = "25555"
 
+# TERMINAL = "gnome-terminal"
 TERMINAL = "konsole"
 indicator = None
 server_status = None
@@ -284,6 +286,7 @@ def get_status():
         output["test"] = on_string
     else:
         output["test"] = off_string
+
     # print json.dumps(output, indent = 2)
 
     return output
