@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+
 import os, signal, gi, time, json
 
 gi.require_version('Gtk', '3.0')
@@ -16,9 +17,9 @@ APPINDICATOR_ID = 'McController'
 
 IP = "grapefruit.vingu.online"
 
-SURVIVAL_PORT = "25555"
-PANGEA_PORT = "25001"
 TEST_PORT = "25123"
+PANGEA_PORT = "25001"
+SURVIVAL_PORT = "25555"
 
 indicator = None
 server_status = None
@@ -46,14 +47,11 @@ def update_widget():
 		indicator.set_menu(build_menu())
 		notify.Notification.new("<b>Notification</b>", 'Server status changed.', None).show()
 
-
 	# Update current status.
 	return True
 
-
 def build_menu():
 	global server_status
-	global TEST
 	menu = gtk.Menu()
 
 	##########################################################
@@ -68,16 +66,22 @@ def build_menu():
 	show_logs_survival = gtk.MenuItem('Show logs')
 	show_logs_survival.connect('activate', show_logs, "survival")
 
+	save_survival = gtk.MenuItem('Create backup')
+	save_survival.connect('activate', create_backup, "survival")
+
 	submenu_survival.append(item_start_survival)
 	submenu_survival.append(item_stop_survival)
 	submenu_survival.append(show_logs_survival)
+	submenu_survival.append(save_survival)
 
 	item_survival = gtk.MenuItem(server_status["survival"] + "Survival-Server" )
 	item_survival.set_submenu(submenu_survival)
 	menu.append(item_survival)
 
+
 	##########################################################
 	# PANGEA
+	
 	submenu_pangea = gtk.Menu()
 	item_start_pangea = gtk.MenuItem('Start server')
 	item_start_pangea.connect('activate', start_server, "pangea")
@@ -88,13 +92,18 @@ def build_menu():
 	show_logs_pangea = gtk.MenuItem('Show logs')
 	show_logs_pangea.connect('activate', show_logs, "pangea")
 
+	save_pangea = gtk.MenuItem('Create backup')
+	save_pangea.connect('activate', create_backup, "pangea")
+
 	submenu_pangea.append(item_start_pangea)
 	submenu_pangea.append(item_stop_pangea)
 	submenu_pangea.append(show_logs_pangea)
+	submenu_pangea.append(save_pangea)
 
 	item_pangea = gtk.MenuItem(server_status["pangea"] + 'Pangea-Server')
 	item_pangea.set_submenu(submenu_pangea)
 	menu.append(item_pangea)
+
 
 	##########################################################
 	# Test
@@ -109,9 +118,14 @@ def build_menu():
 	show_logs_test = gtk.MenuItem('Show logs')
 	show_logs_test.connect('activate', show_logs, "test")
 
+	save_test = gtk.MenuItem('Create backup')
+	save_test.connect('activate', create_backup, "test")
+
 	submenu_test.append(item_start_test)
 	submenu_test.append(item_stop_test)
 	submenu_test.append(show_logs_test)
+	submenu_test.append(save_test)
+
 	item_test = gtk.MenuItem(server_status["test"] + 'Test-Server')
 	item_test.set_submenu(submenu_test)
 	menu.append(item_test)
@@ -155,7 +169,7 @@ def stop_server(_, server):
 	os.system("gnome-terminal -e '" + linux_cmd + "'")
 
 def show_logs(_, server):
-	notify.Notification.new("<b>Notification</b>", 'Zeige server logs vON '+ server + '', None).show()
+	notify.Notification.new("<b>Notification</b>", 'Zeige server logs von ' + server + '', None).show()
 	linux_cmd = 'ssh robin@grapefruit.vingu.online make show_logs_' + server
 	os.system("gnome-terminal -e '" + linux_cmd + "'")
 
@@ -168,6 +182,51 @@ def update(_):
 	os.chdir(default_path)
 	os.system("kill " + str(process_id))
 
+def create_backup(_, server):
+	dialog = gtk.FileChooserDialog("Select folder to create a backup of "+ server + "-server!", 
+		None, gtk.FileChooserAction.SAVE,
+		(gtk.STOCK_CANCEL, gtk.ResponseType.CANCEL,
+			gtk.STOCK_SAVE, gtk.ResponseType.OK))
+
+	dialog.set_default_response(gtk.ResponseType.OK)
+
+	filter = gtk.FileFilter()
+	filter.set_name("All files")
+	filter.add_pattern("*")
+	dialog.add_filter(filter)
+
+	filter = gtk.FileFilter()
+	filter.set_name("Images")
+	filter.add_mime_type("image/png")
+	filter.add_mime_type("image/jpeg")
+	filter.add_mime_type("image/gif")
+	filter.add_pattern("*.png")
+	filter.add_pattern("*.jpg")
+	filter.add_pattern("*.gif")
+	filter.add_pattern("*.tif")
+	filter.add_pattern("*.xpm")
+	dialog.add_filter(filter)
+
+	response = dialog.run()
+
+	if response == gtk.ResponseType.OK:
+		print dialog.get_filename(), 'selected'
+		notify.Notification.new("<b>Notification</b>", 'Backup wird erstellt für ' + server + '', None).show()
+		linux_cmd = ""
+		if server == "survival":
+			linux_cmd = 'rsync -r -v --progress robin@grapefruit.vingu.online:/srv/minecraft-surv ' + str(dialog.get_filename())
+
+		if server == "pangea":
+			linux_cmd = 'rsync -r -v --progress robin@grapefruit.vingu.online:/srv/minecraft-prod ' + str(dialog.get_filename())
+
+		if server == "test":
+			linux_cmd = 'rsync -r -v --progress robin@grapefruit.vingu.online:/srv/minecraft-test ' + str(dialog.get_filename())
+
+		os.system("gnome-terminal -e '" + linux_cmd + "'")
+	elif response == gtk.ResponseType.CANCEL:
+		print 'Closed, no files selected'
+
+	dialog.destroy()
 
 def quit(_):
 	notify.Notification.new("<b>Notification</b>", 'mc-controller wird beendet.', None).show()
