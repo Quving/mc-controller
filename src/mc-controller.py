@@ -17,7 +17,6 @@ from gi.repository import Notify as notify
 from gi.repository import GObject
 
 
-
 APPINDICATOR_ID = 'McController'
 
 IP = "grapefruit.vingu.online"
