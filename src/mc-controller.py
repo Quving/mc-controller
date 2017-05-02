@@ -25,10 +25,10 @@ IP = "grapefruit.vingu.online"
 TEST_PORT = "25123"
 PANGEA_PORT = "25001"
 SURVIVAL_PORT = "25555"
-TERMINAL = "gnome-terminal"
+# TERMINAL = "gnome-terminal"
 BACKUP_PATH = "/home/robin/Spiele/Backups/"
 # BACKUP_PATH = "/home/vinh/Desktop/"
-# TERMINAL = "konsole"
+TERMINAL = "konsole"
 indicator = None
 server_status = None
 
