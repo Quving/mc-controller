@@ -5,6 +5,7 @@ import os
 import signal
 import gi
 import json
+import time
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('Notify', '0.7')
@@ -24,8 +25,10 @@ IP = "grapefruit.vingu.online"
 TEST_PORT = "25123"
 PANGEA_PORT = "25001"
 SURVIVAL_PORT = "25555"
-# TERMINAL = "gnome-terminal"
-TERMINAL = "konsole"
+TERMINAL = "gnome-terminal"
+# BACKUP_PATH = "/home/robin/Spiele/Backups/"
+BACKUP_PATH = "/home/vinh/Desktop/"
+# TERMINAL = "konsole"
 indicator = None
 server_status = None
 
@@ -198,60 +201,27 @@ def update(_):
 
 
 def create_backup(_, server):
-    default_path = os.getcwd()
-    os.chdir("/home")
-    dialog = gtk.FileChooserDialog("Select folder to create a backup of "+ server + "-server!",
-        None, gtk.FileChooserAction.SAVE,
-        (gtk.STOCK_CANCEL, gtk.ResponseType.CANCEL,
-            gtk.STOCK_SAVE, gtk.ResponseType.OK))
+    notify.Notification.new("<b>Notification</b>", 'Backup wird erstellt für ' + server + '', None).show()
+    linux_cmd = ""
+    now = time.strftime("%Y%m%d-%H%M")+"_"
+    if server == "survival":
+        linux_cmd = 'rsync -r -v --progress robin@grapefruit.vingu.online:/srv/minecraft-surv/ ' + BACKUP_PATH + now + server 
 
-    dialog.set_default_response(gtk.ResponseType.OK)
+    if server == "pangea":
+        linux_cmd = 'rsync -r -v --progress robin@grapefruit.vingu.online:/srv/minecraft-prod/ ' + BACKUP_PATH + now + server 
 
-    filter = gtk.FileFilter()
-    filter.set_name("All files")
-    filter.add_pattern("*")
-    dialog.add_filter(filter)
+    if server == "test":
+        linux_cmd = 'rsync -r -v --progress robin@grapefruit.vingu.online:/srv/minecraft-test/ ' + BACKUP_PATH + now + server 
 
-    filter = gtk.FileFilter()
-    filter.set_name("Images")
-    filter.add_mime_type("image/png")
-    filter.add_mime_type("image/jpeg")
-    filter.add_mime_type("image/gif")
-    filter.add_pattern("*.png")
-    filter.add_pattern("*.jpg")
-    filter.add_pattern("*.gif")
-    filter.add_pattern("*.tif")
-    filter.add_pattern("*.xpm")
-    dialog.add_filter(filter)
+    print linux_cmd
+    # Execute command to backup
+    state = os.system(TERMINAL + " -e '" + linux_cmd + "'")
 
-    response = dialog.run()
+    if state == 0:
+        notify.Notification.new("<b>Notification</b>", 'Backup für ' + server + ' wurde erfolgreich erstellt.', None).show()
+    else:
+        notify.Notification.new("<b>Notification</b>", 'Backup für ' + server + ' konnte nicht erstellt werden.', None).show()
 
-    if response == gtk.ResponseType.OK:
-        os.chdir(default_path)
-        notify.Notification.new("<b>Notification</b>", 'Backup wird erstellt für ' + server + '', None).show()
-        linux_cmd = ""
-        if server == "survival":
-            linux_cmd = 'rsync -r -v --progress robin@grapefruit.vingu.online:/srv/minecraft-surv/ ' + str(dialog.get_filename())
-
-        if server == "pangea":
-            linux_cmd = 'rsync -r -v --progress robin@grapefruit.vingu.online:/srv/minecraft-prod/ ' + str(dialog.get_filename())
-
-        if server == "test":
-            linux_cmd = 'rsync -r -v --progress robin@grapefruit.vingu.online:/srv/minecraft-test/ ' + str(dialog.get_filename())
-
-        # Execute command to backup
-        state = os.system(TERMINAL + " -e '" + linux_cmd + "'")
-        if state == 0:
-            notify.Notification.new("<b>Notification</b>", 'Backup für ' + server + ' wurde erfolgreich erstellt.', None).show()
-        else:
-            notify.Notification.new("<b>Notification</b>", 'Backup für ' + server + ' konnte nicht erstellt werden.', None).show()
-
-    elif response == gtk.ResponseType.CANCEL:
-        os.chdir(default_path)
-        notify.Notification.new("<b>Notification</b>", 'Backup für ' + server + ' wurde nicht erstellt.', None).show()
-
-
-    dialog.destroy()
 
 
 def quit(_):
